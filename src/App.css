@@ -1,0 +1,13 @@
+.generated-output {
+  display: flex;
+  flex-direction: column;
+}
+
+.generated-output p {
+  margin: 0.5rem 0;
+}
+
+textarea {
+  min-height: 40vh;
+  min-width: 40vw;
+}
