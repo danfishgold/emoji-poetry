@@ -1,5 +1,5 @@
 import { sum, random, minBy } from './util'
-import emojiData from '../emoji.json'
+import emojiData from './emoji.json'
 
 export type BaseProperties = {
   character: string

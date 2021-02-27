@@ -4,7 +4,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
-    "prebuild:emoji": "ts-node --project ./tsconfig.json src/generateEmoji.ts > emoji.json"
+    "prebuild:emoji": "ts-node --project ./tsconfig.json src/generateEmoji.ts > src/emoji.json"
   },
   "dependencies": {
     "cmudict": "^1.0.2",
