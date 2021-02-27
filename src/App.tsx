@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import './App.css'
-import { randomPatternOptionButPreferrablyLong, Emoji } from './emoji'
+import {
+  randomPatternOptionButPreferrablyLong,
+  Emoji,
+  randomRhymingPatternOptions,
+} from './emoji'
 
 type RawString = { type: 'rawString'; string: string }
 type LinePattern = { type: 'linePattern'; scansion: string; rhyme?: string }
@@ -22,7 +26,7 @@ function App() {
   const [shouldUseSymbols, setShouldUseSymbols] = useState(false)
 
   const regenerateBlock = () => {
-    setGeneratedBlock(generateBlock(pattern, shouldUseSymbols))
+    setGeneratedBlock(generateBlock(pattern))
   }
 
   const generatedLines = generatedBlock
@@ -51,21 +55,26 @@ function App() {
 
   return (
     <div className='App'>
+      <h1>emoji poems</h1>
       <p>
-        generate poems with emoji! based on{' '}
+        generate poems using emoji! based on{' '}
         <a href='https://twitter.com/NealePickett/status/1364301232613990403'>
           this tweet
         </a>{' '}
         by Neale Pickett
       </p>
       <p>
-        you can build it manually (<code>/</code> for stressed syllables,{' '}
-        <code>x</code> for unstressed, lines with matching letters in
-        parentheses will rhyme), or use one of these presets:
+        you can structure it yourself in the editor below (<code>/</code> for
+        stressed syllables, <code>x</code> for unstressed, lines with matching
+        letters in parentheses will rhyme), or use one of these presets:
       </p>
       <button onClick={() => setPattern(limerick)}>limerick</button>
       <button onClick={() => setPattern(commonMeter)}>common meter</button>
       <button onClick={() => setPattern(tweet)}>Naele's tweet</button>
+      <p>
+        I limited it to emoji that screen readers would parse the same way
+        humans would, so there's no 🦊 (fox face) or 🏠 (house building)
+      </p>
       <div>
         <textarea
           value={pattern}
@@ -86,23 +95,59 @@ function App() {
 }
 const patternRegex = /([\/x]+)(?: *\(([A-Z])\))?/g
 
-function generateBlock(
-  pattern: string,
-  shouldUseSymbols: boolean,
-): GeneratedPart[] {
-  const parts = split(pattern)
+function generateAllLines(lines: LinePattern[]): GeneratedLine[] {
+  const rhymeGroups = new Map<string | undefined, [string, number][]>()
+  lines.forEach((line, index) => {
+    const existing = rhymeGroups.get(line.rhyme) ?? []
+    rhymeGroups.set(line.rhyme, existing.concat([[line.scansion, index]]))
+  })
 
-  return parts.map((part) => {
-    switch (part.type) {
-      case 'rawString': {
-        return part
-      }
-      case 'linePattern': {
-        const sequence = randomPatternOptionButPreferrablyLong(part.scansion)
-        return { type: 'generatedLine' as const, sequence }
-      }
+  const allGeneratedLines = Array.from(rhymeGroups.entries())
+    .map(([group, lines]): [Emoji[], number][] => {
+      const scansions = lines.map((line) => line[0])
+      const generatedLines = group
+        ? randomRhymingPatternOptions(scansions)
+        : scansions.map((s) => randomPatternOptionButPreferrablyLong(s))
+
+      const indexes = lines.map((line) => line[1])
+      return generatedLines.map((line, index) => [line, indexes[index]])
+    })
+    .flat(1)
+
+  const sortedGeneratedLines = allGeneratedLines
+    .sort((a, b) => a[1] - b[1])
+    .map((l) => l[0])
+
+  return sortedGeneratedLines.map((line) => ({
+    type: 'generatedLine',
+    sequence: line,
+  }))
+}
+
+// HACKKKKK
+function generateBlock(pattern: string): GeneratedPart[] {
+  const parts = split(pattern)
+  let result: (GeneratedPart | undefined)[] = parts.map((part) => {
+    if (part.type === 'linePattern') {
+      return undefined
+    } else {
+      return part
     }
   })
+
+  const indexedLinePatterns = parts
+    .map((part, index): [PatternPart, number] => [part, index])
+    .filter((p) => p[0].type === 'linePattern') as [LinePattern, number][]
+
+  const linePatterns = indexedLinePatterns.map((p) => p[0])
+  const indexes = indexedLinePatterns.map((p) => p[1])
+  const generatedLines = generateAllLines(linePatterns)
+
+  generatedLines.forEach((line, index) => {
+    result[indexes[index]] = line
+  })
+
+  return result as GeneratedPart[]
 }
 function split(pattern: string): PatternPart[] {
   const matches = pattern.matchAll(patternRegex)

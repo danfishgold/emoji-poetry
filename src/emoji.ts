@@ -72,15 +72,63 @@ export class Emoji {
 
 export const emoji = emojiData.emoji.map((properties) => new Emoji(properties))
 
+const emojiByCharacter = new Map(emoji.map((e) => [e.character, e]))
+
+export function randomRhymingPatternOptions(
+  patterns: string[],
+  remainingTries: number = 10000,
+): Emoji[][] {
+  if (patterns.length < 2) {
+    return patterns.map((p) => randomPatternOption(p, remainingTries))
+  }
+
+  if (remainingTries === 0) {
+    throw new Error(`nioeee with ${patterns.join(' ')}`)
+  }
+
+  const rhymingGroup = [...random(emojiData.rhymes)].map(
+    (e) => emojiByCharacter.get(e)!,
+  )
+
+  try {
+    return patterns.map((pattern) =>
+      randomPatternOptionWithEndFromOptions(pattern, rhymingGroup),
+    )
+  } catch {
+    return randomRhymingPatternOptions(patterns, remainingTries - 1)
+  }
+}
+
+function randomPatternOptionWithEndFromOptions(
+  pattern: string,
+  options: Emoji[],
+  remainingTries: number = 10000,
+): Emoji[] {
+  const relevantOptions = options.filter((option) => {
+    const subpattern = pattern.slice(-option.syllableCount)
+    return option.matchesPattern(subpattern)
+  })
+
+  if (relevantOptions.length === 0) {
+    throw new Error('nope')
+  }
+
+  const option = random(relevantOptions)
+  return randomPatternOptionButPreferrablyLong(
+    pattern.slice(0, -option.syllableCount),
+    remainingTries,
+  ).concat([option])
+}
+
 export function randomPatternOptionButPreferrablyLong(
   pattern: string,
   remainingTries: number = 10000,
-) {
+): Emoji[] {
   const attempts = new Array(20)
     .fill(0)
     .map(() => randomPatternOption(pattern, remainingTries))
 
-  return minBy(attempts, (line) => line.length)
+  return minBy(attempts, (line) => line.length)[0]
 }
 
 export function randomPatternOption(
@@ -92,11 +140,13 @@ export function randomPatternOption(
   }
 
   if (remainingTries === 0) {
-    throw new Error(`Failed to build a phrase with the pattern ${pattern}`)
+    throw new Error(
+      `Failed to build a phrase with the pattern ${JSON.stringify(pattern)}`,
+    )
   }
 
   const first = random(emoji)
-  if (first.syllableCount > pattern.length) {
+  if (first.syllableCount > JSON.stringify(pattern).length) {
     return randomPatternOption(pattern, remainingTries)
   }
 
