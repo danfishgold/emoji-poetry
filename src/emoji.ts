@@ -79,7 +79,7 @@ export function randomRhymingPatternOptions(
   remainingTries: number = 10000,
 ): Emoji[][] {
   if (patterns.length < 2) {
-    return patterns.map((p) => randomPatternOption(p, remainingTries))
+    return patterns.map((p) => eagerRandomPatternOption(p, remainingTries))
   }
 
   if (remainingTries === 0) {
@@ -114,24 +114,29 @@ function randomPatternOptionWithEndFromOptions(
   }
 
   const option = random(relevantOptions)
-  return randomPatternOptionButPreferrablyLong(
+  return randomPatternOption(
     pattern.slice(0, -option.syllableCount),
     remainingTries,
   ).concat([option])
 }
 
-export function randomPatternOptionButPreferrablyLong(
+// calls eagerRandomPatternOption [cohortSize] times and takes the result with
+// the fewest characters of those, in an effort to avoid sequences that
+// are just monosyllabic emoji
+export function randomPatternOption(
   pattern: string,
   remainingTries: number = 10000,
+  cohortSize: number = 20,
 ): Emoji[] {
-  const attempts = new Array(20)
+  const attempts = new Array(cohortSize)
     .fill(0)
-    .map(() => randomPatternOption(pattern, remainingTries))
+    .map(() => eagerRandomPatternOption(pattern, remainingTries))
 
   return minBy(attempts, (line) => line.length)[0]
 }
 
-export function randomPatternOption(
+// tries to generate a sequence that matches the pattern. stops as soon as it finds one
+export function eagerRandomPatternOption(
   pattern: string,
   remainingTries: number = 10000,
 ): Emoji[] {
@@ -147,14 +152,14 @@ export function randomPatternOption(
 
   const first = random(emoji)
   if (first.syllableCount > JSON.stringify(pattern).length) {
-    return randomPatternOption(pattern, remainingTries)
+    return eagerRandomPatternOption(pattern, remainingTries)
   }
 
   if (!first.matchesPattern(pattern.slice(0, first.syllableCount))) {
-    return randomPatternOption(pattern, remainingTries - 1)
+    return eagerRandomPatternOption(pattern, remainingTries - 1)
   }
 
-  const ending = randomPatternOption(
+  const ending = eagerRandomPatternOption(
     pattern.slice(first.syllableCount),
     remainingTries,
   )

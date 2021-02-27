@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import './App.css'
 import {
-  randomPatternOptionButPreferrablyLong,
+  randomPatternOption,
   Emoji,
   randomRhymingPatternOptions,
 } from './emoji'
@@ -107,7 +107,7 @@ function generateAllLines(lines: LinePattern[]): GeneratedLine[] {
       const scansions = lines.map((line) => line[0])
       const generatedLines = group
         ? randomRhymingPatternOptions(scansions)
-        : scansions.map((s) => randomPatternOptionButPreferrablyLong(s))
+        : scansions.map((s) => randomPatternOption(s))
 
       const indexes = lines.map((line) => line[1])
       return generatedLines.map((line, index) => [line, indexes[index]])
