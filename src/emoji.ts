@@ -77,9 +77,12 @@ const emojiByCharacter = new Map(emoji.map((e) => [e.character, e]))
 export function randomRhymingPatternOptions(
   patterns: string[],
   remainingTries: number = 10000,
-): Emoji[][] {
+): [Emoji[][], Emoji[] | undefined] {
   if (patterns.length < 2) {
-    return patterns.map((p) => eagerRandomPatternOption(p, remainingTries))
+    return [
+      patterns.map((p) => randomPatternOption(p, remainingTries)),
+      undefined,
+    ]
   }
 
   if (remainingTries === 0) {
@@ -91,15 +94,18 @@ export function randomRhymingPatternOptions(
   )
 
   try {
-    return patterns.map((pattern) =>
-      randomPatternOptionWithEndFromOptions(pattern, rhymingGroup),
-    )
+    return [
+      patterns.map((pattern) =>
+        randomPatternOptionWithEndFromOptions(pattern, rhymingGroup),
+      ),
+      rhymingGroup,
+    ]
   } catch {
     return randomRhymingPatternOptions(patterns, remainingTries - 1)
   }
 }
 
-function randomPatternOptionWithEndFromOptions(
+export function randomPatternOptionWithEndFromOptions(
   pattern: string,
   options: Emoji[],
   remainingTries: number = 10000,

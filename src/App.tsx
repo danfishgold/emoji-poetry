@@ -8,7 +8,11 @@ import {
 
 type RawString = { type: 'rawString'; string: string }
 type LinePattern = { type: 'linePattern'; scansion: string; rhyme?: string }
-type GeneratedLine = { type: 'generatedLine'; sequence: Emoji[] }
+type GeneratedLine = {
+  type: 'generatedLine'
+  sequence: Emoji[]
+  rhymeGroup?: Emoji[]
+}
 
 type PatternPart = RawString | LinePattern
 
@@ -23,7 +27,7 @@ const tweet =
 function App() {
   const [pattern, setPattern] = useState(limerick)
   const [generatedBlock, setGeneratedBlock] = useState<GeneratedPart[]>([])
-  const [shouldUseSymbols, setShouldUseSymbols] = useState(false)
+  const [shouldUseSymbols, setShouldUseSymbols] = useState(true)
 
   const regenerateBlock = () => {
     setGeneratedBlock(generateBlock(pattern))
@@ -37,11 +41,7 @@ function App() {
         }
         case 'generatedLine': {
           return part.sequence
-            .map((emoji) =>
-              shouldUseSymbols
-                ? emoji.character
-                : `${emoji.phrase}(${emoji.syllableCount})`,
-            )
+            .map((emoji) => (shouldUseSymbols ? emoji.character : emoji.phrase))
             .join(shouldUseSymbols ? '' : ' ')
         }
       }
@@ -103,24 +103,30 @@ function generateAllLines(lines: LinePattern[]): GeneratedLine[] {
   })
 
   const allGeneratedLines = Array.from(rhymeGroups.entries())
-    .map(([group, lines]): [Emoji[], number][] => {
+    .map(([group, lines]): [Emoji[], Emoji[] | undefined, number][] => {
       const scansions = lines.map((line) => line[0])
-      const generatedLines = group
+      const [generatedLines, rhymeGroup] = group
         ? randomRhymingPatternOptions(scansions)
-        : scansions.map((s) => randomPatternOption(s))
+        : [scansions.map((s) => randomPatternOption(s)), undefined]
 
       const indexes = lines.map((line) => line[1])
-      return generatedLines.map((line, index) => [line, indexes[index]])
+      return generatedLines.map((line, index) => [
+        line,
+        rhymeGroup,
+        indexes[index],
+      ])
     })
     .flat(1)
 
-  const sortedGeneratedLines = allGeneratedLines
-    .sort((a, b) => a[1] - b[1])
-    .map((l) => l[0])
+  const sortedGeneratedLinesAndRhymeGroups: [
+    Emoji[],
+    Emoji[] | undefined,
+  ][] = allGeneratedLines.sort((a, b) => a[2] - b[2]).map((l) => [l[0], l[1]])
 
-  return sortedGeneratedLines.map((line) => ({
+  return sortedGeneratedLinesAndRhymeGroups.map(([line, rhymeGroup]) => ({
     type: 'generatedLine',
     sequence: line,
+    rhymeGroup,
   }))
 }
 
