@@ -1,4 +1,4 @@
-import { Emoji, rhymeGroups } from './emoji'
+import { emoji, Emoji, rhymeGroups } from './emoji'
 import * as Sequence from './sequence'
 import { random } from './util'
 
@@ -138,4 +138,25 @@ function generateSequence(
     rhymeId,
     sequence,
   }
+}
+
+export function outputToString(lines: OutputLineAtom[][]): string {
+  return lines
+    .map((line) =>
+      line
+        .map((atom) => {
+          switch (atom.type) {
+            case 'rawString': {
+              return atom.string
+            }
+            case 'generatedSequence': {
+              return atom.sequence
+                .map(([em]) => em.character + '\uFE0F')
+                .join('')
+            }
+          }
+        })
+        .join(''),
+    )
+    .join('\n')
 }

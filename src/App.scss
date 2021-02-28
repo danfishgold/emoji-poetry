@@ -1,0 +1,155 @@
+:root {
+  --background: white;
+  --button-background: pink;
+  --button-highlighted-background: rgb(255, 143, 161);
+  --button-shadow: rgb(211, 95, 114);
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code,
+textarea {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+body {
+  background: var(--background);
+  line-height: 1.25;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 90%;
+  width: 60rem;
+  margin: 0 auto;
+}
+
+header,
+main,
+footer {
+  margin: 2rem auto;
+  width: 100%;
+}
+
+header {
+  h1 {
+    text-align: center;
+    font-size: 2.5rem;
+  }
+
+  .template-options {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    button {
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+  }
+}
+
+button {
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 0.25rem;
+  background: var(--button-background);
+  box-shadow: 0 0.25rem var(--button-shadow);
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--button-highlighted-background);
+    }
+  }
+
+  &:focus {
+    background: var(--button-highlighted-background);
+  }
+
+  &:active {
+    transform: translateY(0.1rem);
+    box-shadow: 0 0.15rem var(--button-shadow);
+    color: unset;
+  }
+}
+
+a {
+  color: black;
+
+  &:hover {
+    color: blue;
+  }
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+
+  @media (max-width: 45rem) {
+    grid-template-columns: 1fr;
+  }
+
+  .input {
+    textarea {
+      border: none;
+      background: #eee;
+      padding: 1rem;
+      width: calc(100% - 2rem);
+      min-height: 25rem;
+      font-size: 1rem;
+    }
+  }
+
+  .output {
+    .controls {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+
+      &__symbols {
+        flex-shrink: 0;
+        margin-bottom: 0.5rem;
+
+        input[type='radio'] {
+          margin-right: 0.25rem;
+        }
+        label {
+          margin-right: 1rem;
+        }
+      }
+
+      &__actions {
+        button {
+          &:not(:first-child) {
+            margin-left: 0.5rem;
+          }
+        }
+      }
+    }
+    .generated-output {
+      background: white;
+      padding: 1rem;
+      margin-top: 1rem;
+
+      p {
+        margin-bottom: 0; // to remove extra whitespace when copying
+      }
+    }
+  }
+}
+
+footer {
+  text-align: center;
+}
