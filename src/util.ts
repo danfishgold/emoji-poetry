@@ -31,3 +31,48 @@ function extremumBy<T>(
 
   return [bestPair[1], bestPair[2]]
 }
+
+export function mapToObject<V>(map: Map<string, V>): { [key: string]: V } {
+  const object: { [key: string]: V } = {}
+  map.forEach((value, key) => {
+    object[key] = value
+  })
+
+  return object
+}
+
+export function* stringSplits(
+  str: string,
+  isSubstringValid: (substring: string) => boolean,
+): Generator<string[]> {
+  if (str.length === 0) {
+    yield []
+    return
+  }
+  for (let length = 1; length <= str.length; length++) {
+    const start = str.slice(0, length)
+    if (!isSubstringValid(start)) {
+      continue
+    }
+    for (const tailSplit of stringSplits(str.slice(length), isSubstringValid)) {
+      yield [start, ...tailSplit]
+    }
+  }
+}
+
+export function compactMap<T, R>(
+  array: T[],
+  fn: (el: T, index: number) => R | undefined,
+): R[] {
+  return array.map(fn).filter((res): res is R => res !== undefined)
+}
+
+export function tryMap<T, R>(array: T[], fn: (el: T, index: number) => R): R[] {
+  return compactMap(array, (el, index) => {
+    try {
+      return fn(el, index)
+    } catch {
+      return undefined
+    }
+  })
+}

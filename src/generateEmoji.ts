@@ -1,21 +1,79 @@
 import { CMUDict } from 'cmudict'
 import * as unicode from 'unicode/category/So'
-import { BaseProperties as BaseEmojiProperties } from './emoji'
+import { mapToObject } from './util'
 
 const cmudict = new CMUDict()
 
-export function generateEmojiData(character: string): BaseEmojiProperties {
-  const codePoint = knownCharCodeAt(character, 0)
-  const phrase: string | undefined = unicode[codePoint]?.name?.toLowerCase()
-  if (!phrase) {
-    throw new Error(`Couldn't parse emoji: ${character}`)
-  }
-  const syllables = phrase
-    .split(' ')
-    .map((word) => cmudict.get(word))
-    .map(syllablesFromPhonemes)
+function generateEmojiInfo(
+  emojiCharacters: string,
+): {
+  emojiProperties: Map<
+    string,
+    {
+      name: string
+      scansions: string[]
+    }
+  >
+  scansionOptions: Map<string, string>
+} {
+  const scansionOptions = new Map<string, string>()
+  const emojiProperties = new Map(
+    [...emojiCharacters].map((emoji) => {
+      const name = emojiName(emoji)
+      const syllables = name
+        .split(' ')
+        .map((word) => cmudict.get(word))
+        .flatMap(syllablesFromPhonemes)
+      return [
+        emoji,
+        {
+          name,
+          syllableCount: syllables.length,
+          scansions: possibleScansions(syllables),
+        },
+      ]
+    }),
+  )
 
-  return { character, phrase, syllables }
+  emojiProperties.forEach(({ scansions }, emoji) => {
+    scansions.forEach((scansion) => {
+      const existingOptions = scansionOptions.get(scansion) ?? ''
+      scansionOptions.set(scansion, existingOptions + emoji)
+    })
+  })
+
+  return { emojiProperties, scansionOptions }
+
+  //   possibleScansions(syllables).forEach((scansion) => {
+  //     const existingOptions = scansionOptions.get(scansion) ?? []
+  //     scansionOptions.set(scansion, existingOptions.concat(emoji))
+  //   })
+  // }
+  // return { scansionOptions, emojiNames }
+}
+
+function emojiName(emoji: string): string {
+  const codePoint = knownCharCodeAt(emoji, 0)
+  const name: string | undefined = unicode[codePoint]?.name?.toLowerCase()
+  if (!name) {
+    throw new Error(`Couldn't parse emoji: ${emoji}`)
+  }
+
+  return name
+}
+
+const scansionOptionsForStress = [['x'], ['/'], ['x', '/']]
+
+function possibleScansions(syllables: number[]): string[] {
+  if (syllables.length == 0) {
+    return ['']
+  }
+
+  const first = syllables[0]
+  const tailOptions = possibleScansions(syllables.slice(1))
+  return tailOptions.flatMap((tail) =>
+    scansionOptionsForStress[first].map((head) => head + tail),
+  )
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt#fixing_charcodeat_to_handle_non-basic-multilingual-plane_characters_if_their_presence_earlier_in_the_string_is_known
@@ -55,12 +113,17 @@ function syllablesFromPhonemes(phonemes: string): number[] {
   return [...phonemes.matchAll(/\d/g)].map((match) => parseInt(match[0]))
 }
 
-const emojiData = [
-  ...'👻💀🦶🦵💄🦷👅👂👃👁🧠🥷🧝🧟🧛🧚👗👑🐨🐔🐧🦆🦅🦇🐗🪱🦋🐌🐜🪳🕷🕸🦂🐢🐍🦎🐙🦑🦀🐡🐬🐘🦘🐂🐄🐎🐖🐑🐕🐩🐈🦃🦚🦜🦢🦩🐇🦝🦨🦥🐁🦔🍄🌹🌻🔥🌈🍐🍋🍌🍉🍓🥭🍍🥥🍅🥑🥦🥒🥕🧄🧅🥔🍞🥚🥓🦴🌭🌮🍿🍩🍪🥄🪃🪁🎤🎷🎺🪗🎻🚌🚜🛰🚀⛰⌚🖨📷🔋🕯🪛🔨🧲💣🪓🔭🔬🚽🪣🔑🚪🧸🎈🪑🔔',
-].map(generateEmojiData)
+const rhymes = ['🦵🥚', '🔋🍓', '🔬🔭', '🎤🎷', '🦝🥄', '🦇🐈', '👃🌹']
+const { scansionOptions, emojiProperties } = generateEmojiInfo(
+  '👻💀🦶🦵💄🦷👅👂👃👁🧠🥷🧝🧟🧛🧚👗👑🐨🐔🐧🦆🦅🦇🐗🪱🦋🐌🐜🪳🕷🕸🦂🐢🐍🦎🐙🦑🦀🐡🐬🐘🦘🐂🐄🐎🐖🐑🐕🐩🐈🦃🦚🦜🦢🦩🐇🦝🦨🦥🐁🦔🍄🌹🌻🔥🌈🍐🍋🍌🍉🍓🥭🍍🥥🍅🥑🥦🥒🥕🧄🧅🥔🍞🥚🥓🦴🌭🌮🍿🍩🍪🥄🪃🪁🎤🎷🎺🪗🎻🚌🚜🛰🚀⛰⌚🖨📷🔋🕯🪛🔨🧲💣🪓🔭🔬🚽🪣🔑🚪🧸🎈🪑🔔',
+)
 
 // no owl (🦉) because it's monosyllabic but weird
 
-const rhymes = ['🦵🥚', '🔋🍓', '🔬🔭', '🎤🎷', '🦝🥄', '🦇🐈', '👃🌹']
-
-console.log(JSON.stringify({ emoji: emojiData, rhymes }))
+console.log(
+  JSON.stringify({
+    scansionOptions: mapToObject(scansionOptions),
+    emojiProperties: mapToObject(emojiProperties),
+    rhymes,
+  }),
+)

@@ -1,4 +1,4 @@
-import { emoji, Emoji, rhymeGroups } from './emoji'
+import { allEmoji, Emoji, rhymeGroups, scansionOptions } from './emoji'
 import * as Sequence from './sequence'
 import { random } from './util'
 
@@ -76,22 +76,40 @@ export function randomRhymeOptions(
 ): Map<string, Emoji[]> {
   const scansionsByRhymeId = rhymeIdsAndTheirScansions(templateLines)
   return new Map(
-    Array.from(scansionsByRhymeId.entries()).map(([id, scansions]) => {
-      const relevantGroups = rhymeGroups.filter((group) =>
-        scansions.every((scansion) =>
-          group.some((emoji) =>
-            emoji.matchesScansion(scansion.slice(-emoji.syllableCount)),
-          ),
-        ),
-      )
-      if (relevantGroups.length === 0) {
-        throw new Error(
-          `Impossible form: there are no rhymes that will fit group (${id})`,
-        )
-      }
-      return [id, random(relevantGroups)]
-    }),
+    Array.from(scansionsByRhymeId.entries()).map(([id, scansions]) => [
+      id,
+      randomRhymeOptionsForGroup(scansions, id),
+    ]),
   )
+}
+
+function randomRhymeOptionsForGroup(
+  scansions: string[],
+  groupId: string,
+): Emoji[] {
+  const relevantGroups = rhymeGroups.filter((group) =>
+    scansions.every((scansion) =>
+      [...group].some((emoji) =>
+        Sequence.isEmojiValidAsEnding(allEmoji.get(emoji) as Emoji, scansion),
+      ),
+    ),
+  )
+  if (relevantGroups.length === 0) {
+    console.info(
+      `gave up on trying to find rhyming words for group (${groupId})`,
+    )
+    const validStandaloneSequences = [
+      ...scansionOptions.keys(),
+    ].filter((sequence) =>
+      scansions.every((scansion) =>
+        Sequence.isSequenceValidAsEnding(sequence, scansion),
+      ),
+    )
+    const sequence = random(validStandaloneSequences)
+    const emoji = random(scansionOptions.get(sequence)!)
+    return [allEmoji.get(emoji)!]
+  }
+  return [...random(relevantGroups)].map((e) => allEmoji.get(e)!)
 }
 
 export function generate(

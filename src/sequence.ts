@@ -1,17 +1,15 @@
-import { Emoji, emoji } from './emoji'
-import { minBy, random } from './util'
+import { tryMap, minBy, random, stringSplits } from './util'
+import { allEmoji, Emoji, scansionOptions } from './emoji'
 
 export function matchWithConstrainedEnd(
   scansion: string,
   endOptions: Emoji[],
-  remainingTries: number = 10000,
 ): [Emoji, string][] {
-  const relevantOptions = endOptions.filter((option) => {
-    const ending = scansion.slice(-option.syllableCount)
-    return option.matchesScansion(ending)
-  })
+  const validOptions = endOptions.filter((e) =>
+    isEmojiValidAsEnding(e, scansion),
+  )
 
-  if (relevantOptions.length === 0) {
+  if (validOptions.length === 0) {
     throw new Error(
       `no relevant rhyming options form ${scansion} between ${endOptions
         .map((opt) => opt.character)
@@ -19,55 +17,69 @@ export function matchWithConstrainedEnd(
     )
   }
 
-  const option = random(relevantOptions)
-  return match(
-    scansion.slice(0, -option.syllableCount),
-    remainingTries,
-  ).concat([[option, scansion.slice(-option.syllableCount)]])
+  const option = random(validOptions)
+  const beginningScansion = scansion.slice(0, -option.syllableCount)
+  const endScansion = scansion.slice(-option.syllableCount)
+  return [...match(beginningScansion), [option, endScansion]]
 }
 
-// calls eagerMatch [cohortSize] times and takes the result with
-// the fewest characters of those, in an effort to avoid sequences that
-// are just monosyllabic emoji
-export function match(
-  scansion: string,
-  remainingTries: number = 10000,
-  cohortSize: number = 20,
-): [Emoji, string][] {
-  const attempts = new Array(cohortSize)
-    .fill(0)
-    .map(() => eagerMatch(scansion, remainingTries))
-
-  return minBy(attempts, (sequence) => sequence.length)[0]
+export function isEmojiValidAsEnding(emoji: Emoji, scansion: string): boolean {
+  return emoji.scansions.some((sequence) =>
+    isSequenceValidAsEnding(sequence, scansion),
+  )
 }
 
-// tries to generate a sequence that matches the scansion.
-// stops as soon as it finds one
-function eagerMatch(
+export function isSequenceValidAsEnding(
+  sequence: string,
   scansion: string,
-  remainingTries: number = 10000,
-): [Emoji, string][] {
-  if (scansion.length === 0) {
-    return []
+): boolean {
+  if (!scansion.endsWith(sequence)) {
+    return false
+  }
+  return isScansionValid(scansion.slice(0, -sequence.length))
+}
+
+export function match(scansion: string): [Emoji, string][] {
+  const split = preferrablyLongScansionSplit(scansion)
+
+  if (!split) {
+    throw new Error(`Unable to generate a line matching ${scansion}`)
+  }
+  return split.map((subscansion) => {
+    const emojiOptions = scansionOptions.get(subscansion) as string[]
+    const emoji = allEmoji.get(random(emojiOptions)) as Emoji
+    return [emoji, subscansion]
+  })
+}
+
+function preferrablyLongScansionSplit(
+  scansion: string,
+  attempts: number = 10,
+): string[] | undefined {
+  const valids = [...validScansionSplits(scansion)]
+  if (valids.length === 0) {
+    return undefined
   }
 
-  if (remainingTries === 0) {
-    throw new Error(
-      `Failed to build a phrase from the scansion ${JSON.stringify(scansion)}`,
-    )
+  const randoms = new Array(attempts).fill(0).map(() => random(valids))
+  return minBy(randoms, (split) => split.length)[0]
+}
+
+function validScansionSplits(scansion: string): Generator<string[]> {
+  return stringSplits(scansion, (subscansion) =>
+    scansionOptions.has(subscansion),
+  )
+}
+
+const scansionGeneratability = new Map<string, boolean>()
+function isScansionValid(scansion: string): boolean {
+  const storedValue = scansionGeneratability.get(scansion)
+
+  if (storedValue !== undefined) {
+    return storedValue
   }
 
-  const first = random(emoji)
-  if (first.syllableCount > scansion.length) {
-    return eagerMatch(scansion, remainingTries)
-  }
-
-  const beginning = scansion.slice(0, first.syllableCount)
-  if (!first.matchesScansion(beginning)) {
-    return eagerMatch(scansion, remainingTries - 1)
-  }
-
-  const ending = eagerMatch(scansion.slice(first.syllableCount), remainingTries)
-
-  return [[first, beginning] as [Emoji, string]].concat(ending)
+  const firstValidScansion = validScansionSplits(scansion).next()
+  scansionGeneratability.set(scansion, !firstValidScansion.done)
+  return !firstValidScansion.done
 }
