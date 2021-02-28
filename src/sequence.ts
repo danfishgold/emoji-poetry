@@ -40,6 +40,9 @@ export function isSequenceValidAsEnding(
 }
 
 export function match(scansion: string): [Emoji, string][] {
+  if (scansion === 'x') {
+    return match('/')
+  }
   const split = preferrablyLongScansionSplit(scansion)
 
   if (!split) {

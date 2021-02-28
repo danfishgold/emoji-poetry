@@ -146,6 +146,10 @@ main {
       p {
         margin-bottom: 0; // to remove extra whitespace when copying
       }
+
+      .error {
+        color: red;
+      }
     }
   }
 }

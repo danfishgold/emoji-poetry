@@ -3,10 +3,16 @@ import * as Sequence from './sequence'
 import { random } from './util'
 
 export type TemplateLineAtom = RawString | Scansion
-export type OutputLineAtom = RawString | GeneratedSequence
+export type OutputLineAtom = RawString | GeneratedSequence | GenerationError
 
 type RawString = { type: 'rawString'; string: string }
 export type Scansion = { type: 'scansion'; scansion: string; rhymeId?: string }
+export type GenerationError = {
+  type: 'generationError'
+  scansion: string
+  rhymeId?: string
+  errorMessage: string
+}
 type GeneratedSequence = {
   type: 'generatedSequence'
   scansion: string
@@ -135,7 +141,16 @@ export function generateAtom(
       return atom
     }
     case 'scansion': {
-      return generateSequence(atom, rhymeOptions)
+      try {
+        return generateSequence(atom, rhymeOptions)
+      } catch (e) {
+        return {
+          type: 'generationError',
+          scansion: atom.scansion,
+          rhymeId: atom.rhymeId,
+          errorMessage: e,
+        }
+      }
     }
   }
 }

@@ -8,7 +8,7 @@ const limerick =
 const commonMeter = 'x/x/x/x/\nx/x/x/ (A)\nx/x/x/x/\nx/x/x/ (A)'
 const tweet =
   '/xx/x (A)\n/xx/ (B)\n/xx/x (A)\n/xx/ (B)\n\n/xx/x\n/xx/ (C)\n/xx/xx/xx/ (C)\n\n/xx/xx/xx/ (D)\n/xx/xx/xx/ (D)\n\n/xx/xx/xx/ (E)\n/xx\n/xx\n/xx\n/ (E)'
-const tips = `tip #1: don't like one of the generated lines? click on it to randomize it and keep the rest of the lines the same\n\ntip #2: you can use words and emoji together /xx/x even in the same line. be careful of the letter x\n\ntip #3: you can also have internal rhymes in the same line: /xx/(A)xx/xx/(A)`
+const tips = `tip #1: you can use words and emoji together /xx/x even in the same line. be careful of the letter x\n\ntip #2: you can also have internal rhymes in the same line: /xx/(A)xx/xx/(A)`
 
 function App() {
   const [
@@ -54,6 +54,10 @@ function App() {
             use letters in parentheses for rhyming structure: if two (or more)
             lines share the same letter they'll rhyme. for example{' '}
             <code>/xx/x (A)</code> and <code>/xx/ (A)</code>
+          </li>
+          <li>
+            don't like one of the generated lines? click on it to randomize it
+            (and keep the rest the same)
           </li>
         </ul>
         <p>
@@ -170,7 +174,7 @@ function Atom({
       return (
         <span
           role='button'
-          aria-label={atom.sequence.map(([emoji]) => emoji.phrase).join(' ')}
+          aria-label={atom.sequence.map(([emoji]) => emoji.name).join(' ')}
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === ' ' || e.key === 'Enter') {
@@ -182,9 +186,16 @@ function Atom({
         >
           {atom.sequence
             .map(([emoji]) =>
-              shouldUseSymbols ? emoji.character + '\uFE0F' : emoji.phrase,
+              shouldUseSymbols ? emoji.character + '\uFE0F' : emoji.name,
             )
             .join(shouldUseSymbols ? '' : ' ')}
+        </span>
+      )
+    }
+    case 'generationError': {
+      return (
+        <span className='error'>
+          can't generate this sequence (<code>{atom.scansion}</code>)
         </span>
       )
     }
