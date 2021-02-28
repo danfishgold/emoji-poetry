@@ -2,9 +2,8 @@ import React, { useState } from 'react'
 import * as Template from './template'
 import useTemplate from './useTemplate'
 import './App.scss'
+import { random } from './util'
 
-const limerick =
-  'x/xx/xx/x (A)\nx/xx/xx/x (A)\nx/xx/x (B)\nx/xx/x (B)\nx/xx/xx/x (A)'
 const commonMeter = 'x/x/x/x/\nx/x/x/ (A)\nx/x/x/x/\nx/x/x/ (A)'
 const tweet =
   '/xx/x (A)\n/xx/ (B)\n/xx/x (A)\n/xx/ (B)\n\n/xx/x\n/xx/ (C)\n/xx/xx/xx/ (C)\n\n/xx/xx/xx/ (D)\n/xx/xx/xx/ (D)\n\n/xx/xx/xx/ (E)\n/xx\n/xx\n/xx\n/ (E)'
@@ -39,7 +38,9 @@ function App() {
         <p>you can use one of these presets for the template below:</p>
         <div className='template-options'>
           <button onClick={() => setTemplate(tweet)}>Neale's tweet</button>
-          <button onClick={() => setTemplate(limerick)}>limerick</button>
+          <button onClick={() => setTemplate(randomLimerick())}>
+            limerick
+          </button>
           <button onClick={() => setTemplate(commonMeter)}>common meter</button>
           <button onClick={() => setTemplate(tips)}>tips</button>
         </div>
@@ -200,6 +201,16 @@ function Atom({
       )
     }
   }
+}
+
+function randomLimerick(): string {
+  const longFoot = random(['/xx', 'x/x', 'xx/'])
+  const shortFoot = random(['/xx', 'x/x', 'xx/'])
+
+  const longLine = [longFoot, longFoot, longFoot, '(A)'].join('')
+  const shortLine = [shortFoot, shortFoot, '(B)'].join('')
+
+  return [longLine, longLine, shortLine, shortLine, longLine].join('\n')
 }
 
 export default App
