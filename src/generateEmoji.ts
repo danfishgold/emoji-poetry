@@ -113,9 +113,9 @@ function syllablesFromPhonemes(phonemes: string): number[] {
   return [...phonemes.matchAll(/\d/g)].map((match) => parseInt(match[0]))
 }
 
-const rhymes = ['🦵🥚', '🔋🍓', '🔬🔭', '🎤🎷', '🦝🥄', '🦇🐈', '👃🌹']
+const rhymes = ['🦵🥚', '🔋🍓', '🔬🔭', '🎤🎷', '🦝🥄', '🦇🐈🐀', '👃🌹']
 const { scansionOptions, emojiProperties } = generateEmojiInfo(
-  '👻💀🦶🦵💄🦷👅👂👃👁🧠🥷🧝🧟🧛🧚👗👑🐨🐔🐧🦆🦅🦇🐗🪱🦋🐌🐜🪳🕷🕸🦂🐢🐍🦎🐙🦑🦀🐡🐬🐘🦘🐂🐄🐎🐖🐑🐕🐩🐈🦃🦚🦜🦢🦩🐇🦝🦨🦥🐁🦔🍄🌹🌻🔥🌈🍐🍋🍌🍉🍓🥭🍍🥥🍅🥑🥦🥒🥕🧄🧅🥔🍞🥚🥓🦴🌭🌮🍿🍩🍪🥄🪃🪁🎤🎷🎺🪗🎻🚌🚜🛰🚀⛰⌚🖨📷🔋🕯🪛🔨🧲💣🪓🔭🔬🚽🪣🔑🚪🧸🎈🪑🔔',
+  '👻💀🦶🦵💄🦷👅👂👃👁🧠🥷🧝🧟🧛🧚👗👑🐨🐔🐧🦆🦅🦇🐗🪱🦋🐌🐜🪳🕷🕸🦂🐢🐍🦎🐙🦑🦀🐡🐬🐘🦘🐂🐄🐎🐖🐑🐕🐩🐈🦃🦚🦜🦢🦩🐇🦝🦨🦥🐁🐀🦔🍄🌹🌻🔥🌈🍐🍋🍌🍉🍓🥭🍍🥥🍅🥑🥦🥒🥕🧄🧅🥔🍞🥚🥓🦴🌭🌮🍿🍩🍪🥄🪃🪁🎤🎷🎺🪗🎻🚌🚜🛰🚀⛰⌚🖨📷🔋🕯🪛🔨🧲💣🪓🔭🔬🚽🪣🔑🚪🧸🎈🪑🔔',
 )
 
 // no owl (🦉) because it's monosyllabic but weird
