@@ -1,4 +1,4 @@
-import { tryMap, minBy, random, stringSplits } from './util'
+import { minBy, random, stringSplits } from './util'
 import { allEmoji, Emoji, scansionOptions } from './emoji'
 
 export function matchWithConstrainedEnd(

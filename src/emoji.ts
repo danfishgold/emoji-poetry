@@ -1,4 +1,3 @@
-// import { sum } from './util'
 import infoFromJson from './emoji.json'
 
 export type Emoji = {
