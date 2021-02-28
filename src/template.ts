@@ -111,6 +111,9 @@ function randomRhymeOptionsForGroup(
         Sequence.isSequenceValidAsEnding(sequence, scansion),
       ),
     )
+    if (validStandaloneSequences.length === 0) {
+      throw new Error(`no rhyme options found for group (${groupId})`)
+    }
     const sequence = random(validStandaloneSequences)
     const emoji = random(scansionOptions.get(sequence)!)
     return [allEmoji.get(emoji)!]

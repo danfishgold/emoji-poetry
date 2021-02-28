@@ -26,9 +26,16 @@ export default function useTemplate(
   )
 
   const regenerate = useCallback(() => {
-    const generated = generate(templateLines.current)
-    setOutputLines(generated.outputLines)
-    setRhymeOptions(generated.rhymeOptions)
+    try {
+      const generated = generate(templateLines.current)
+      setOutputLines(generated.outputLines)
+      setRhymeOptions(generated.rhymeOptions)
+    } catch (e) {
+      setOutputLines([
+        [{ type: 'generationError', scansion: '', errorMessage: e }],
+      ])
+      setRhymeOptions(new Map())
+    }
   }, [templateLines])
 
   useEffect(() => {
