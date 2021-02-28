@@ -53,45 +53,58 @@ function parseLine(line: string): TemplateLineAtom[] {
   return parts
 }
 
-function rhymeIds(templateLines: TemplateLineAtom[][]): Set<string> {
-  const ids = templateLines
+function rhymeIdsAndTheirScansions(
+  templateLines: TemplateLineAtom[][],
+): Map<string, string[]> {
+  const idsScansionPairs: [string, string][] = templateLines
     .flat()
     .filter((atom): atom is Scansion => atom.type === 'scansion')
-    .map((scansion) => scansion.rhymeId)
+    .filter((scansion) => scansion.rhymeId !== undefined)
+    .map((scansion) => [scansion.rhymeId!, scansion.scansion])
 
-  return new Set(ids.filter((id): id is string => id !== undefined))
+  const scansionsById = new Map()
+  idsScansionPairs.forEach(([id, scansion]) => {
+    const existing = scansionsById.get(id)
+    scansionsById.set(id, (existing ?? []).concat(scansion))
+  })
+
+  return scansionsById
 }
 
 export function randomRhymeOptions(
   templateLines: TemplateLineAtom[][],
 ): Map<string, Emoji[]> {
-  const ids = rhymeIds(templateLines)
-  return new Map(Array.from(ids).map((id) => [id, random(rhymeGroups)]))
+  const scansionsByRhymeId = rhymeIdsAndTheirScansions(templateLines)
+  return new Map(
+    Array.from(scansionsByRhymeId.entries()).map(([id, scansions]) => {
+      const relevantGroups = rhymeGroups.filter((group) =>
+        scansions.every((scansion) =>
+          group.some((emoji) =>
+            emoji.matchesScansion(scansion.slice(-emoji.syllableCount)),
+          ),
+        ),
+      )
+      if (relevantGroups.length === 0) {
+        throw new Error(
+          `Impossible form: there are no rhymes that will fit group (${id})`,
+        )
+      }
+      return [id, random(relevantGroups)]
+    }),
+  )
 }
 
 export function generate(
   templateLines: TemplateLineAtom[][],
   rhymeOptions: Map<string, Emoji[]> = randomRhymeOptions(templateLines),
-  remainingTries: number = 20,
 ): { outputLines: OutputLineAtom[][]; rhymeOptions: Map<string, Emoji[]> } {
-  if (remainingTries === 0) {
-    throw new Error(`Can't generate this template. probably due to rhymes`)
-  }
-  try {
-    const outputLines: OutputLineAtom[][] = templateLines.map((line) =>
-      line.map((atom) => generateAtom(atom, rhymeOptions)),
-    )
+  const outputLines: OutputLineAtom[][] = templateLines.map((line) =>
+    line.map((atom) => generateAtom(atom, rhymeOptions)),
+  )
 
-    return {
-      outputLines,
-      rhymeOptions,
-    }
-  } catch {
-    return generate(
-      templateLines,
-      randomRhymeOptions(templateLines),
-      remainingTries - 1,
-    )
+  return {
+    outputLines,
+    rhymeOptions,
   }
 }
 
