@@ -82,7 +82,7 @@ function LineAtom({
 }) {
   switch (atom.type) {
     case 'rawString': {
-      return <>atom.string</>
+      return <>{atom.string}</>
     }
     case 'generatedSequence': {
       return (

@@ -43,7 +43,7 @@ function parseLine(line: string): TemplateLineAtom[] {
     })
     lastIndex = match.index + match[0].length
   }
-  if (lastIndex < line.length - 1) {
+  if (lastIndex < line.length) {
     parts.push({
       type: 'rawString' as const,
       string: line.slice(lastIndex, line.length),
