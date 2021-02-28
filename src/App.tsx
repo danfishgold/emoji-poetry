@@ -5,7 +5,7 @@ import useTemplate from './useTemplate'
 
 const limerick =
   'x/xx/xx/x (A)\nx/xx/xx/x (A)\nx/xx/x (B)\nx/xx/x (B)\nx/xx/xx/x (A)'
-const commonMeter = 'x/x/x/x/ (A)\nx/x/x/ (B)\nx/x/x/x/\nx/x/x/ (B)'
+const commonMeter = 'x/x/x/x/\nx/x/x/ (A)\nx/x/x/x/\nx/x/x/ (A)'
 const tweet =
   '/xx/x (A)\n/xx/ (B)\n/xx/x (A)\n/xx/ (B)\n\n/xx/x\n/xx/ (C)\n/xx/xx/xx/ (C)\n\n/xx/xx/xx/ (D)\n/xx/xx/xx/ (D)\n\n/xx/xx/xx/ (E)\n/xx\n/xx\n/xx\n/ (E)'
 
@@ -17,7 +17,7 @@ function App() {
     _,
     regenerate,
     regenerateAtom,
-  ] = useTemplate(limerick)
+  ] = useTemplate(tweet)
   const [shouldUseSymbols, setShouldUseSymbols] = useState(true)
 
   return (
@@ -35,9 +35,9 @@ function App() {
         stressed syllables, <code>x</code> for unstressed, lines with matching
         letters in parentheses will rhyme), or use one of these presets:
       </p>
+      <button onClick={() => setTemplate(tweet)}>Naele's tweet</button>
       <button onClick={() => setTemplate(limerick)}>limerick</button>
       <button onClick={() => setTemplate(commonMeter)}>common meter</button>
-      <button onClick={() => setTemplate(tweet)}>Naele's tweet</button>
       <p>
         I limited it to emoji that screen readers would parse the same way
         humans would, so there's no 🦊 (fox face) or 🏠 (house building)
@@ -89,7 +89,7 @@ function LineAtom({
         <span onClick={onClick}>
           {atom.sequence
             .map(([emoji]) =>
-              shouldUseSymbols ? emoji.character : emoji.phrase,
+              shouldUseSymbols ? emoji.character + '\ufe0f' : emoji.phrase,
             )
             .join(shouldUseSymbols ? '' : ' ')}
         </span>
