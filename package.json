@@ -4,7 +4,7 @@
     "build:emoji": "ts-node --project ./tsconfig.json src/generateEmoji.ts > src/emoji.json",
     "build:src": "tsc && vite build",
     "dev:src": "vite",
-    "dev": "npm-run-all build:emoji dev:src",
+    "dev": "npm-run-all -s build:emoji dev:src",
     "build": "npm-run-all build:emoji build:src",
     "serve": "vite preview"
   },
