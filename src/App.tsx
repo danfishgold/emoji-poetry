@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import './App.css'
-import { Emoji } from './emoji'
 import * as Template from './template'
 import useTemplate from './useTemplate'
 
@@ -23,7 +22,7 @@ function App() {
 
   return (
     <div className='App'>
-      <h1>emoji poems</h1>
+      <h1>emoji poetry</h1>
       <p>
         generate poems using emoji! based on{' '}
         <a href='https://twitter.com/NealePickett/status/1364301232613990403'>

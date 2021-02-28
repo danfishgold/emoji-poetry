@@ -31,21 +31,3 @@ function extremumBy<T>(
 
   return [bestPair[1], bestPair[2]]
 }
-
-// concat an array of arrays with an element between each subarray,
-// kinda like array.join, but for stuff that aren't strings
-export function spliceButLikeInElm<T>(arrays: T[][], joiner: T): T[] {
-  return arrays.reduce((accum, next) => accum.concat(joiner, ...next))
-}
-
-export function split<T>(array: T[], predicate: (el: T) => boolean): T[][] {
-  const firstIndex = array.findIndex(predicate)
-  array.filter
-  if (firstIndex === -1) {
-    return [array]
-  }
-
-  return [array.slice(0, firstIndex)].concat(
-    split(array.slice(firstIndex + 1), predicate),
-  )
-}

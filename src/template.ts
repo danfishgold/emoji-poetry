@@ -1,6 +1,6 @@
 import { Emoji, rhymeGroups } from './emoji'
 import * as Sequence from './sequence'
-import { random, spliceButLikeInElm, split } from './util'
+import { random } from './util'
 
 export type TemplateLineAtom = RawString | Scansion
 export type OutputLineAtom = RawString | GeneratedSequence
