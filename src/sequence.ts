@@ -4,6 +4,7 @@ import { allEmoji, Emoji, scansionOptions } from './emoji'
 export function matchWithConstrainedEnd(
   scansion: string,
   endOptions: Emoji[],
+  preferrablyLongScansions: boolean = true,
 ): [Emoji, string][] {
   const validOptions = endOptions.filter((e) =>
     isEmojiValidAsEnding(e, scansion),
@@ -20,7 +21,10 @@ export function matchWithConstrainedEnd(
   const option = random(validOptions)
   const beginningScansion = scansion.slice(0, -option.syllableCount)
   const endScansion = scansion.slice(-option.syllableCount)
-  return [...match(beginningScansion), [option, endScansion]]
+  return [
+    ...match(beginningScansion, preferrablyLongScansions),
+    [option, endScansion],
+  ]
 }
 
 export function isEmojiValidAsEnding(emoji: Emoji, scansion: string): boolean {
@@ -39,11 +43,14 @@ export function isSequenceValidAsEnding(
   return isScansionValid(scansion.slice(0, -sequence.length))
 }
 
-export function match(scansion: string): [Emoji, string][] {
+export function match(
+  scansion: string,
+  preferrablyLongScansions: boolean = true,
+): [Emoji, string][] {
   if (scansion === 'x') {
     return match('/')
   }
-  const split = preferrablyLongScansionSplit(scansion)
+  const split = randomScansionSplit(scansion, preferrablyLongScansions ? 10 : 1)
 
   if (!split) {
     throw new Error(`Unable to generate a line matching ${scansion}`)
@@ -55,16 +62,16 @@ export function match(scansion: string): [Emoji, string][] {
   })
 }
 
-function preferrablyLongScansionSplit(
+function randomScansionSplit(
   scansion: string,
-  attempts: number = 10,
+  cohorstSize: number = 10,
 ): string[] | undefined {
   const valids = [...validScansionSplits(scansion)]
   if (valids.length === 0) {
     return undefined
   }
 
-  const randoms = new Array(attempts).fill(0).map(() => random(valids))
+  const randoms = new Array(cohorstSize).fill(0).map(() => random(valids))
   return minBy(randoms, (split) => split.length)[0]
 }
 

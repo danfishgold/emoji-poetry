@@ -138,6 +138,7 @@ export function generate(
 export function generateAtom(
   atom: TemplateLineAtom,
   rhymeOptions: Map<string, Emoji[]>,
+  preferrablyLongScansions: boolean = true,
 ): OutputLineAtom {
   switch (atom.type) {
     case 'rawString': {
@@ -145,7 +146,7 @@ export function generateAtom(
     }
     case 'scansion': {
       try {
-        return generateSequence(atom, rhymeOptions)
+        return generateSequence(atom, rhymeOptions, preferrablyLongScansions)
       } catch (e) {
         return {
           type: 'generationError',
@@ -161,13 +162,18 @@ export function generateAtom(
 function generateSequence(
   { scansion, rhymeId }: Scansion,
   rhymeOptions: Map<string, Emoji[]>,
+  preferrablyLongScansions: boolean = true,
 ): GeneratedSequence {
   const possibleEndings =
     rhymeId !== undefined ? rhymeOptions.get(rhymeId) : undefined
   const sequence =
     possibleEndings === undefined
-      ? Sequence.match(scansion)
-      : Sequence.matchWithConstrainedEnd(scansion, possibleEndings)
+      ? Sequence.match(scansion, preferrablyLongScansions)
+      : Sequence.matchWithConstrainedEnd(
+          scansion,
+          possibleEndings,
+          preferrablyLongScansions,
+        )
   return {
     type: 'generatedSequence',
     scansion,

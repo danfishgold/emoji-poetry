@@ -48,6 +48,7 @@ export default function useTemplate(
     const newAtom = generateAtom(
       templateLines.current[lineIndex][atomIndex],
       rhymeOptions,
+      false,
     )
     const newLine = [
       ...line.slice(0, atomIndex),
