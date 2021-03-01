@@ -152,12 +152,19 @@ function Line({
   return (
     <p>
       {atoms.map((atom, atomIndex) => (
-        <Atom
-          key={`atom-${atomIndex}`}
-          atom={atom}
-          shouldUseSymbols={shouldUseSymbols}
-          onClick={() => onClick(atomIndex)}
-        />
+        <>
+          <Atom
+            key={`atom-${atomIndex}`}
+            atom={atom}
+            shouldUseSymbols={shouldUseSymbols}
+            onClick={() => onClick(atomIndex)}
+          />
+          {/* add a space between sequences if displaying words instead of emoji */}
+          {!shouldUseSymbols &&
+            atomIndex < atoms.length - 1 &&
+            atoms[atomIndex].type === 'generatedSequence' &&
+            atoms[atomIndex + 1].type === 'generatedSequence' && <span> </span>}
+        </>
       ))}
     </p>
   )
