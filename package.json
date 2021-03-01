@@ -5,7 +5,7 @@
     "build:src": "tsc && vite build",
     "dev:src": "vite",
     "dev": "npm-run-all -s build:emoji dev:src",
-    "build": "npm-run-all build:emoji build:src",
+    "build": "npm-run-all -s build:emoji build:src",
     "serve": "vite preview"
   },
   "dependencies": {
