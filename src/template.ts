@@ -92,13 +92,18 @@ function randomRhymeOptionsForGroup(
   scansions: string[],
   groupId: string,
 ): Emoji[] {
-  const relevantGroups = rhymeGroups.filter((group) =>
-    scansions.every((scansion) =>
-      [...group].some((emoji) =>
+  const relevantGroups = rhymeGroups.filter((group) => {
+    const relevantEmojiForEachScansion = scansions.map((scansion) =>
+      [...group].filter((emoji) =>
         Sequence.isEmojiValidAsEnding(allEmoji.get(emoji) as Emoji, scansion),
       ),
-    ),
-  )
+    )
+    if (!relevantEmojiForEachScansion.every((options) => options.length > 0)) {
+      return false
+    }
+    const emojiSet = new Set(relevantEmojiForEachScansion.flat())
+    return emojiSet.size > 1
+  })
   if (relevantGroups.length === 0) {
     console.info(
       `gave up on trying to find rhyming words for group (${groupId})`,
