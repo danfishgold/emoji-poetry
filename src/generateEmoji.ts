@@ -20,10 +20,13 @@ function generateEmojiInfo(
   const emojiProperties = new Map(
     [...emojiCharacters].map((emoji) => {
       const name = emojiName(emoji)
-      const syllables = name
-        .split(' ')
-        .map((word) => cmudict.get(word))
-        .flatMap(syllablesFromPhonemes)
+      const syllables = name.split(' ').flatMap((word) => {
+        const phonemes = cmudict.get(word)
+        if (!phonemes) {
+          throw new Error(`Can't find phonemes for ${word}`)
+        }
+        return syllablesFromPhonemes(phonemes)
+      })
       return [
         emoji,
         {
@@ -112,7 +115,9 @@ function knownCharCodeAt(str: string, idx: number) {
 function rhymingPart(phrase: string): string {
   const words = phrase.split(' ')
   const phonemes = cmudict.get(words[words.length - 1])
-  const relevantPart = phonemes.match(/\w+[12][^12]*$/)?.[0].replaceAll(' ', '')
+  const relevantPart = phonemes
+    ?.match(/\w+[12][^12]*$/)?.[0]
+    .replaceAll(' ', '')
   if (!relevantPart) {
     throw new Error(
       `Something went wrong while trying to find rhymes for ${phrase}`,
