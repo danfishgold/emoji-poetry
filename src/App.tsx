@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import * as Template from './template'
 import useTemplate from './useTemplate'
 import './App.scss'
@@ -155,9 +155,8 @@ function Line({
   return (
     <p>
       {atoms.map((atom, atomIndex) => (
-        <>
+        <Fragment key={`atom-${atomIndex}`}>
           <Atom
-            key={`atom-${atomIndex}`}
             atom={atom}
             shouldUseSymbols={shouldUseSymbols}
             onClick={() => onClick(atomIndex)}
@@ -167,7 +166,7 @@ function Line({
             atomIndex < atoms.length - 1 &&
             atoms[atomIndex].type === 'generatedSequence' &&
             atoms[atomIndex + 1].type === 'generatedSequence' && <span> </span>}
-        </>
+        </Fragment>
       ))}
     </p>
   )
