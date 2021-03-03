@@ -117,7 +117,7 @@ function rhymingPart(phrase: string): string {
   const phonemes = cmudict.get(words[words.length - 1])
   const relevantPart = phonemes
     ?.match(/\w+[12][^12]*$/)?.[0]
-    .replaceAll(' ', '')
+    .replaceAll(/\d| /g, '')
   if (!relevantPart) {
     throw new Error(
       `Something went wrong while trying to find rhymes for ${phrase}`,
