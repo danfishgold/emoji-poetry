@@ -1,4 +1,5 @@
 import { allEmoji, Emoji, rhymeGroups, scansionOptions } from './emoji'
+import { RhymeGroupError } from './errors'
 import * as Sequence from './sequence'
 import { random } from './util'
 
@@ -9,9 +10,7 @@ type RawString = { type: 'rawString'; string: string }
 export type Scansion = { type: 'scansion'; scansion: string; rhymeId?: string }
 export type GenerationError = {
   type: 'generationError'
-  scansion: string
-  rhymeId?: string
-  errorMessage: string
+  error: Error
 }
 type GeneratedSequence = {
   type: 'generatedSequence'
@@ -112,7 +111,7 @@ function randomRhymeOptionsForGroup(
       ),
     )
     if (validStandaloneSequences.length === 0) {
-      throw new Error(`no rhyme options found for group (${groupId})`)
+      throw new RhymeGroupError(groupId)
     }
     const sequence = random(validStandaloneSequences)
     const emoji = random(scansionOptions.get(sequence)!)
@@ -147,12 +146,10 @@ export function generateAtom(
     case 'scansion': {
       try {
         return generateSequence(atom, rhymeOptions, preferrablyLongScansions)
-      } catch (e) {
+      } catch (error) {
         return {
           type: 'generationError',
-          scansion: atom.scansion,
-          rhymeId: atom.rhymeId,
-          errorMessage: e,
+          error,
         }
       }
     }

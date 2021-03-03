@@ -30,10 +30,8 @@ export default function useTemplate(
       const generated = generate(templateLines.current)
       setOutputLines(generated.outputLines)
       setRhymeOptions(generated.rhymeOptions)
-    } catch (e) {
-      setOutputLines([
-        [{ type: 'generationError', scansion: '', errorMessage: e }],
-      ])
+    } catch (error) {
+      setOutputLines([[{ type: 'generationError', error }]])
       setRhymeOptions(new Map())
     }
   }, [templateLines])

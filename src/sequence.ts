@@ -1,5 +1,6 @@
 import { minBy, random, stringSplits } from './util'
 import { allEmoji, Emoji, scansionOptions } from './emoji'
+import { ScansionRhymeError, ScansionError } from './errors'
 
 export function matchWithConstrainedEnd(
   scansion: string,
@@ -11,11 +12,7 @@ export function matchWithConstrainedEnd(
   )
 
   if (validOptions.length === 0) {
-    throw new Error(
-      `no relevant rhyming options form ${scansion} between ${endOptions
-        .map((opt) => opt.character)
-        .join('')}`,
-    )
+    throw new ScansionRhymeError(scansion, endOptions)
   }
 
   const option = random(validOptions)
@@ -53,7 +50,7 @@ export function match(
   const split = randomScansionSplit(scansion, preferrablyLongScansions ? 10 : 1)
 
   if (!split) {
-    throw new Error(`Unable to generate a line matching ${scansion}`)
+    throw new ScansionError(scansion)
   }
   return split.map((subscansion) => {
     const emojiOptions = scansionOptions.get(subscansion) as string[]

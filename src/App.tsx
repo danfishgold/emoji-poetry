@@ -211,7 +211,7 @@ function Atom({
     case 'generationError': {
       return (
         <span className='error'>
-          can't generate this sequence (<code>{atom.scansion}</code>)
+          <code>{atom.error.message}</code>
         </span>
       )
     }
