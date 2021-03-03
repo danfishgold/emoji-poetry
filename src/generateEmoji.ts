@@ -109,16 +109,73 @@ function knownCharCodeAt(str: string, idx: number) {
   return code
 }
 
+function rhymingPart(phrase: string): string {
+  const words = phrase.split(' ')
+  const phonemes = cmudict.get(words[words.length - 1])
+  const relevantPart = phonemes.match(/\w+[12][^12]*$/)?.[0].replaceAll(' ', '')
+  if (!relevantPart) {
+    throw new Error(
+      `Something went wrong while trying to find rhymes for ${phrase}`,
+    )
+  }
+
+  return relevantPart
+}
+
+function doPhrasesRhyme(phrase1: string, phrase2: string): boolean {
+  return rhymingPart(phrase1) === rhymingPart(phrase2)
+}
+
 function syllablesFromPhonemes(phonemes: string): number[] {
   return [...phonemes.matchAll(/\d/g)].map((match) => parseInt(match[0]))
 }
 
-const rhymes = ['🦵🥚', '🔋🍓', '🔬🔭', '🎤🎷', '🦝🥄', '🦇🐈🐀', '👃🌹']
+export function generateRhymingInfo(
+  emojiProperties: Map<
+    string,
+    {
+      name: string
+      scansions: string[]
+    }
+  >,
+): string[] {
+  let result: string[] = []
+  let alreadyDone = new Set<string>()
+  for (const [emoji, { name }] of emojiProperties.entries()) {
+    if (alreadyDone.has(emoji)) {
+      continue
+    }
+
+    alreadyDone.add(emoji)
+    let group = [emoji]
+    for (const [otherEmoji, { name: otherName }] of emojiProperties.entries()) {
+      if (alreadyDone.has(otherEmoji)) {
+        continue
+      }
+
+      if (doPhrasesRhyme(name, otherName)) {
+        group.push(otherEmoji)
+        alreadyDone.add(otherEmoji)
+      }
+    }
+
+    if (group.length > 1) {
+      result.push(group.join(''))
+    }
+  }
+
+  return result
+}
+
 const { scansionOptions, emojiProperties } = generateEmojiInfo(
   '👻💀🦶🦵💄🦷👅👂👃👁🧠🥷🧝🧟🧛🧚👗👑🐨🐔🐧🦆🦅🦇🐗🪱🦋🐌🐜🪳🕷🕸🦂🐢🐍🦎🐙🦑🦀🐡🐬🐘🦘🐂🐄🐎🐖🐑🐕🐩🐈🦃🦚🦜🦢🦩🐇🦝🦨🦥🐁🐀🦔🍄🌹🌻🔥🌈🍐🍋🍌🍉🍓🥭🍍🥥🍅🥑🥦🥒🥕🧄🧅🥔🍞🥚🥓🦴🌭🌮🍿🍩🍪🥄🪃🪁🎤🎷🎺🪗🎻🚌🚜🛰🚀⛰⌚🖨📷🔋🕯🪛🔨🧲💣🪓🔭🔬🚽🪣🔑🚪🧸🎈🪑🔔',
+  // no owl (🦉) because it's monosyllabic but weird
 )
 
-// no owl (🦉) because it's monosyllabic but weird
+const rhymes = generateRhymingInfo(emojiProperties).filter(
+  (rhymeGroup) => rhymeGroup !== '🐕🌭' && rhymeGroup !== '🌭🐕',
+)
+// no 🐕🌭 because that's cheating
 
 console.log(
   JSON.stringify({
