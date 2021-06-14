@@ -95,7 +95,9 @@ function randomRhymeOptionsForGroup(
   const relevantGroups = rhymeGroups.filter((group) => {
     const relevantEmojiForEachScansion = scansions.map((scansion) =>
       [...group].filter((emoji) =>
-        Sequence.isEmojiValidAsEnding(allEmoji.get(emoji) as Emoji, scansion),
+        (allEmoji.get(emoji) as Emoji).scansions.some((emojiScansion) =>
+          Sequence.isSequenceValidAsEnding(emojiScansion, scansion),
+        ),
       ),
     )
     if (!relevantEmojiForEachScansion.every((options) => options.length > 0)) {

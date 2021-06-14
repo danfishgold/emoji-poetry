@@ -135,7 +135,7 @@ function syllablesFromPhonemes(phonemes: string): number[] {
   return [...phonemes.matchAll(/\d/g)].map((match) => parseInt(match[0]))
 }
 
-export function generateRhymingInfo(
+function generateRhymingInfo(
   emojiProperties: Map<
     string,
     {

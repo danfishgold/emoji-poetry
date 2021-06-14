@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react'
+import './App.scss'
 import * as Template from './template'
 import useTemplate from './useTemplate'
-import './App.scss'
 import { random } from './util'
 
 const commonMeter = 'x/x/x/x/\nx/x/x/ (A)\nx/x/x/x/\nx/x/x/ (A)'

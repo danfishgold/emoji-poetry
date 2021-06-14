@@ -19,9 +19,12 @@ function extremumBy<T>(
   pluck: (el: T) => number,
   extremum: (...values: number[]) => number,
 ): [T, number] {
+  if (array.length == 0) {
+    throw new Error(`Can't find min/max on an empty array`)
+  }
   const firstPair: [number, T, number] = [pluck(array[0]), array[0], 0]
   const bestPair = array.slice(1).reduce((best, next, nextIndex) => {
-    const pair: [number, T, number] = [pluck(next), next, nextIndex]
+    const pair: [number, T, number] = [pluck(next), next, nextIndex + 1]
     if (extremum(best[0], pair[0]) == best[0]) {
       return best
     } else {

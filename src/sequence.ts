@@ -1,6 +1,6 @@
-import { minBy, random, stringSplits } from './util'
 import { allEmoji, Emoji, scansionOptions } from './emoji'
-import { ScansionRhymeError, ScansionError } from './errors'
+import { ScansionError, ScansionRhymeError } from './errors'
+import { minBy, random, stringSplits } from './util'
 
 export function matchWithConstrainedEnd(
   scansion: string,
@@ -8,7 +8,9 @@ export function matchWithConstrainedEnd(
   preferrablyLongScansions: boolean = true,
 ): [Emoji, string][] {
   const validOptions = endOptions.filter((e) =>
-    isEmojiValidAsEnding(e, scansion),
+    e.scansions.some((emojiScansion) =>
+      isSequenceValidAsEnding(emojiScansion, scansion),
+    ),
   )
 
   if (validOptions.length === 0) {
@@ -24,12 +26,11 @@ export function matchWithConstrainedEnd(
   ]
 }
 
-export function isEmojiValidAsEnding(emoji: Emoji, scansion: string): boolean {
-  return emoji.scansions.some((sequence) =>
-    isSequenceValidAsEnding(sequence, scansion),
-  )
-}
-
+// checks if a valid seuqnecne can be the ending of a scansion.
+// this is done by seeing if the beginning of the scansion (up until the sequence)
+// can be split into valid scansions.
+//
+// note that the validity of the ending is not checked.
 export function isSequenceValidAsEnding(
   sequence: string,
   scansion: string,

@@ -10,10 +10,9 @@ export class RhymeGroupError extends Error {
 
 export class ScansionRhymeError extends Error {
   constructor(scansion: string, rhymeOptions: Emoji[]) {
+    const options = rhymeOptions.map((e) => e.character).join(', ')
     super(
-      `Can't find emoji that fit the rhyme for ${scansion} between ${rhymeOptions
-        .map((e) => e.character)
-        .join('')}`,
+      `Can't find emoji that fit the rhyme for ${scansion} between [${options}]`,
     )
   }
 }

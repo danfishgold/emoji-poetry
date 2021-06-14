@@ -8,7 +8,8 @@ good ol' `npm install` followed by `npm run dev` will give you a nice local
 server. build with `npm run build`. both of these commands run
 `npm run build:emoji` and then a `vite` command.
 
-`build:emoji` generates the `src/emoji.json` file, which is used by the website.
+`build:emoji` generates the `src/emojiData.json` file, which is used by the
+website.
 
 ## how it works
 
@@ -17,9 +18,10 @@ everything flows pretty much sequentially:
 1. `src.generateEmoji.ts` uses the `cmudict` and `unicode` packages to get
    linguistic properties for a list of emoji characters. these packages bundle
    _a lot_ of data so in order to avoid fetching them on the front end this file
-   generates `src/emoji.json` (via `npm run build:emoji`).
+   generates `src/emojiData.json` (via `npm run build:emoji`).
 
-2. `src/emoji.ts` provides a nice wrapper around the data in `src/emoji.json`
+2. `src/emoji.ts` provides a nice wrapper around the data in
+   `src/emojiData.json`
 
 3. `src/sequence.ts` exposes a couple of things. the most important one is the
    `match` function, which takes in a scansion (a sequence of `/` and `x`

@@ -1,4 +1,4 @@
-import infoFromJson from './emoji.json'
+import * as infoFromJson from './emojiData.json'
 
 export type Emoji = {
   character: string

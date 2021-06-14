@@ -2,12 +2,14 @@
   "compilerOptions": {
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "types": ["vite/client"],
+    "types": ["vite/client", "jest"],
     "paths": {
       "cmudict": ["./types/cmudict.d.ts"],
-      "unicode/category/So": ["./types/unicode.d.ts"]
+      "unicode/category/So": ["./types/unicode.d.ts"],
+      "emojiData": ["./src/emojiData.json"]
     },
     "allowJs": false,
+    "checkJs": false,
     "skipLibCheck": false,
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
