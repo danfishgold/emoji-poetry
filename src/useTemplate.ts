@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Emoji } from './emoji'
 import {
+  generate,
+  generateAtom,
   OutputLineAtom,
   parseTemplate,
   TemplateLineAtom,
-  generate,
-  generateAtom,
 } from './template'
 
 export default function useTemplate(
@@ -36,33 +36,44 @@ export default function useTemplate(
     }
   }, [templateLines])
 
-  useEffect(() => {
-    templateLines.current = parseTemplate(template)
-    regenerate()
-  }, [template])
+  const setTemplateAndRegenerate = useCallback(
+    (newTemplate: string) => {
+      setTemplate(newTemplate)
+      templateLines.current = parseTemplate(newTemplate)
+      regenerate()
+    },
+    [setTemplate],
+  )
 
-  const regenerateAtom = (lineIndex: number, atomIndex: number) => {
-    const line = outputLines[lineIndex]
-    const newAtom = generateAtom(
-      templateLines.current[lineIndex][atomIndex],
-      rhymeOptions,
-      false,
-    )
-    const newLine = [
-      ...line.slice(0, atomIndex),
-      newAtom,
-      ...line.slice(atomIndex + 1),
-    ]
-    setOutputLines([
-      ...outputLines.slice(0, lineIndex),
-      newLine,
-      ...outputLines.slice(lineIndex + 1),
-    ])
-  }
+  const regenerateAtom = useCallback(
+    (lineIndex: number, atomIndex: number) => {
+      const line = outputLines[lineIndex]
+      const newAtom = generateAtom(
+        templateLines.current[lineIndex][atomIndex],
+        rhymeOptions,
+        false,
+      )
+      const newLine = [
+        ...line.slice(0, atomIndex),
+        newAtom,
+        ...line.slice(atomIndex + 1),
+      ]
+      setOutputLines([
+        ...outputLines.slice(0, lineIndex),
+        newLine,
+        ...outputLines.slice(lineIndex + 1),
+      ])
+    },
+    [outputLines, templateLines, rhymeOptions, setOutputLines],
+  )
+
+  useEffect(() => {
+    setTemplateAndRegenerate(template)
+  }, [])
 
   return [
     template,
-    setTemplate,
+    setTemplateAndRegenerate,
     outputLines,
     rhymeOptions,
     regenerate,
