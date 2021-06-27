@@ -136,6 +136,7 @@ describe('randomRhymeOptions', () => {
     expect(consoleInfoSpy).toHaveBeenCalledWith(
       `gave up on trying to find rhyming words for group (${group})`,
     )
+    expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
     consoleInfoSpy.mockRestore()
   })
 })
@@ -168,6 +169,7 @@ describe('generateAtom', () => {
     template.generateAtom(atom, new Map())
 
     expect(spy).toHaveBeenCalledWith(atom.scansion, true)
+    expect(spy).toHaveBeenCalledTimes(1)
     spy.mockRestore()
   })
 
@@ -182,6 +184,7 @@ describe('generateAtom', () => {
     template.generateAtom(atom, new Map([['A', rhymeOptions]]))
 
     expect(spy).toHaveBeenCalledWith(atom.scansion, rhymeOptions, true)
+    expect(spy).toHaveBeenCalledTimes(1)
     spy.mockRestore()
   })
 })
